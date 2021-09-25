@@ -26,8 +26,8 @@ def restricaoG2(x1,x2):
     else:
         return 0
 
-limitesG6 = np.asarray([[13, 100], [0, 100]])
-
+limitesG6X = [13,100]
+limitesG6Y = [0,100]
 ##Parametros##
 ##numero de variavéis
 N = 2
@@ -54,7 +54,7 @@ def fitness(individuo):
     return res
 
 def cruzamento(p1,p2):
-    print("p1 e p2 chegando: ", p1,p2, "\n")
+    #print("p1 e p2 chegando: ", p1,p2, "\n")
     c1 = p1
     c2 = p2
     alpha = np.random.uniform(0,1)
@@ -65,22 +65,26 @@ def cruzamento(p1,p2):
     return c1,c2
 
 def mutacao(x):
-    print("x mutacao: ", x)
+    #print("x mutacao: ", x)
     y = x
     u = np.random.uniform(0,1)
     sigma = 1
+    #print("limites - limites", limitesG6[1]-limitesG6[0])
     y = sigma*(limitesG6[1]-limitesG6[0])*(2*u)
-    print(" mutacao: ", y)
+    #print(" mutacao: ", y)
     return y
 
 
 
 def generatepopulation(): 
     for i in range(npop):
-        individuo = limitesG6[:, 0] + np.random.rand(len(limitesG6)) * (limitesG6[:, 1] - limitesG6[:, 0])
-        if(restricaoG1(individuo[0], individuo[1]) and restricaoG2(individuo[0], individuo[1])):
-            pop.append(individuo)
-            solutions.append(G6(individuo[0],individuo[1]))
+        pX = np.random.uniform(limitesG6X[0], limitesG6X[1])
+        print("ponto x ", pX)
+        pY = np.random.uniform(limitesG6Y[0], limitesG6Y[1])
+        print("ponto Y ", pY)
+        if(restricaoG1(pX, pY) and restricaoG2(pX, pY)):
+            pop.append([pX, pY])
+            solutions.append(G6(pX,pY))
             #melhor valor da primeira população
             if(bestSol.sol > solutions[i]):
                 bestSol.sol = solutions[i]
@@ -90,37 +94,38 @@ def generatepopulation():
 
 
 
-
-"""
 def selection(pop,t):
     candidato = [None]*len(pop)
     candidato[0] = random.choices(population=pop, k=1)
-    melhor = candidato[0]
-    print(candidato)
+    melhor = candidato[0][0]
+    print("candidato",candidato)
+    print("melhor", melhor)
     for j in range (2,4):
         candidato[j] = random.choices(pop)
         candidato[j] = np.array(candidato[j])
-        print(candidato[j])
-        if(G6(melhor[0], melhor[1]) > candidato[j]):
-            melhor = candidato[j]
+        #print("melhor", melhor)
+        #print("candidato dentro",candidato[j])
+        #print("candidato dentro",candidato[j][0][1])
+        if(G6(melhor[0], melhor[1]) > G6(candidato[j][0][0], candidato[j][0][1])):
+            melhor = candidato[j][0]
     return melhor
-"""
+
 
 def init():
     generatepopulation()
-    print("população: ", pop,"\n")
+    #print("população: ", pop,"\n")
     #for iteraçoes
     for it in range(5):
-        print("Geração {}: Melhor solução = {}".format(it, bestSol))
+     #   print("Geração {}: Melhor solução = {}".format(it, bestSol))
 
         #for dentro da população
         for ix in range(len(pop)):
             x=1  
             #seleção p1 e p2
-
+            p1 =selection(pop,3)
+            p2 = selection(pop,3)
             #cruzamento
-            p1 = pop[0]
-            p2 = pop[1]
+            
             f1, f2 = cruzamento(p1,p2)
             print("filhos: ", f1,f2,"\n")
             #mutação
@@ -128,17 +133,19 @@ def init():
             f2 = mutacao(f2)
             print("após mutacao", f1,f2,"\n")
             #verificar se obdece aos limites e restrições
+            
+            if(restricaoG1(f1[0], f1[1]) and restricaoG2(f2[0], f2[1])):
+                pop.append(f1)
+                pop.append(f2)
+            #adicionar a Npopulação
+            
+            
 
-            #Avaliar se f1 e f2 são melhores soluções que bestSol 
-            #( a primeira encontrada com a população gerada aleatoriamente)
+            #checar se tem uma solução melhor
 
-    #print(bestSol.sol)
-    #print(pop[0])
-    #print(pop[1])
-    #print(bestSol)
-   
 
 
 print('hello tp2')
 print(pop)
+print("limites: ", limitesG6X, limitesG6Y)
 init()
