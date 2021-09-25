@@ -16,8 +16,8 @@ problema.limitSup = [100,100]
 
 #parametros
 params = structure()
-params.maxIt = 10
-params.npop = 100 #aumentar depois
+params.maxIt = 100
+params.npop = 1000 #aumentar depois
 params.sigma = 0.1
 
 #individuo
@@ -29,8 +29,6 @@ individuo.sol = None
 #filhos
 f1 = individuo.deepcopy()
 f2 = individuo.deepcopy()
-
-
 
 pop = individuo.repeat(params.npop)
 #melhor intermediario
@@ -104,7 +102,7 @@ def mutacao(x):
     y.x2 = y.x2 + aux2
     return y
 
-def roulette_wheel_selection(p):
+def proporcional(p):
     c = np.cumsum(p)
     r = sum(p)*np.random.rand()
     ind = np.argwhere(r <= c)
@@ -112,58 +110,63 @@ def roulette_wheel_selection(p):
 
 
 #main
-print(melhorSolucao)
-melhorSolucao = gerarpop(melhorSolucao)
-beta = 1
-for i in range(params.maxIt):
+def init(melhorSolucao):
+    print(melhorSolucao)
+    melhorSolucao = gerarpop(melhorSolucao)
+    beta = 1
+    for i in range(params.maxIt):
 
-    sols = np.array([x.sol for x in pop])
-    avg_sol = np.mean(sols)
-    if avg_sol != 0:
-        sols = sols/avg_sol
-    probs = np.exp(-beta*sols)
-    #selecionar os pais para o cruzamento só para teste
-    print("##########################################################")
-    print("geração: ", i)
-    print("melhor solucao intermediaria: ", melhorSolucao)
+        sols = np.array([x.sol for x in pop])
+        avg_sol = np.mean(sols)
+        if avg_sol != 0:
+            sols = sols/avg_sol
+        probs = np.exp(-beta*sols)
+        #selecionar os pais para o cruzamento só para teste
+        print("##########################################################")
+        print("geração: ", i)
+        print("melhor solucao intermediaria: ", melhorSolucao)
 
-    # Perform Roulette Wheel Selection
-    p1 = pop[roulette_wheel_selection(probs)]
-    p2 = pop[roulette_wheel_selection(probs)]
+        # Perform Roulette Wheel Selection
+        p1 = pop[proporcional(probs)]
+        p2 = pop[proporcional(probs)]
 
 
-    popf = []
-    for j in range(params.npop):
-        #cruzamento
-        cruzamento(p1.x1,p1.x2,p2.x1,p2.x2)
+        popf = []
+        for j in range(params.npop):
+            #cruzamento
+            cruzamento(p1.x1,p1.x2,p2.x1,p2.x2)
 
-        #mutação
-        f1 = mutacao(f1)
-        f2 = mutacao(f2)
-        #print("f1 após mutação: ", f1)
-        #print("f2 após mutação: ", f2)
+            #mutação
+            f1 = mutacao(f1)
+            f2 = mutacao(f2)
+            #print("f1 após mutação: ", f1)
+            #print("f2 após mutação: ", f2)
+            
+
+            #validar limites e restrições
+            if(validaLimites(f1)):
+                #solução para os filhos
+                if(restricaoG1(f1.x1,f1.x2) and restricaoG2(f1.x1,f1.x2)):
+                    f1.sol = G6(f1.x1,f1.x2)
+                    if f1.sol < melhorSolucao.sol:
+                        melhorSolucao = f1.deepcopy()
+                    popf.append(f1)
+            if(validaLimites(f2)):
+                if(restricaoG1(f2.x1,f2.x2) and restricaoG2(f2.x1,f2.x2)):
+                    f2.sol = G6(f2.x1,f2.x2)
+                    if f2.sol < melhorSolucao.sol:
+                        melhorSolucao = f2.deepcopy()
+                    popf.append(f2)
         
+        pop += popf
+        #print("pop antes: ", pop)
+        pop = sorted(pop, key=lambda x: x.sol)
+        #print("depois sorted")
+        pop = pop[0:params.npop]
+        #print("pop depois: ", pop)
+    print("melhor solução: ", melhorSolucao)
+    return melhorSolucao.sol
 
-        #validar limites e restrições
-        if(validaLimites(f1)):
-            #solução para os filhos
-            if(restricaoG1(f1.x1,f1.x2) and restricaoG2(f1.x1,f1.x2)):
-                f1.sol = G6(f1.x1,f1.x2)
-                if f1.sol < melhorSolucao.sol:
-                    melhorSolucao = f1.deepcopy()
-                popf.append(f1)
-        if(validaLimites(f2)):
-            if(restricaoG1(f2.x1,f2.x2) and restricaoG2(f2.x1,f2.x2)):
-                f2.sol = G6(f2.x1,f2.x2)
-                if f2.sol < melhorSolucao.sol:
-                    melhorSolucao = f2.deepcopy()
-                popf.append(f2)
-      
-    pop += popf
-    #print("pop antes: ", pop)
-    pop = sorted(pop, key=lambda x: x.sol)
-    #print("depois sorted")
-    pop = pop[0:params.npop]
-    #print("pop depois: ", pop)
-print("melhor solução: ", melhorSolucao)
-
+listB = []
+for i in range(30):
+    listB.append(init(melhorSolucao.sol))
