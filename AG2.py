@@ -2,7 +2,9 @@ import numpy as np
 import cmath as cm
 import math as mt
 import random
+from numpy.core.fromnumeric import mean
 from ypstruct import structure
+import matplotlib.pyplot as plt
 def G6(x1,x2):
     res = mt.pow((x1-10), 3) + mt.pow((x2-20),3)
     return res
@@ -165,9 +167,37 @@ def init(melhorSolucao,pop,f1,f2):
         pop = pop[0:params.npop]
         #print("pop depois: ", pop)
     print("melhor solução: ", melhorSolucao)
-    return melhorSolucao.sol
+    return melhorSolucao
 
 listB = []
+'''
+listB.append(init(melhorSolucao,pop,f1,f2))
+print("lista b", listB)
+print("lista b", listB[0].sol)
+'''
+aux = melhorSolucao
+menorx1 = 0
+menorx2 = 0
+aux2 = structure
 for i in range(30):
-    listB.append(init(melhorSolucao,pop,f1,f2))
-    #print(listB[i])
+    aux2 = (init(melhorSolucao,pop,f1,f2))
+    #print("aux2: ", aux2)
+    listB.append(aux2.sol)
+    if(aux2.sol < aux.sol):
+        menorx1 = aux2.x1
+        menorx2 = aux2.x2
+        aux.sol = aux2.sol
+     #   print("menor x1", menorx1)
+#print(listB)
+print("média: ",np.mean(listB))
+print("minimo: ", np.min(listB))
+print("maximo: ", np.max(listB))
+print("desvio padrão: ", np.std(listB))
+print("O menor valor encontrado foi ",aux.sol )
+print("com x1 = ",menorx1)
+print("e x2 = ", menorx2 )
+plt.clf()
+plt.boxplot(listB)
+plt.title("Gráfico da configuração B")
+
+plt.savefig("Nomedo arquivo", format='png')
