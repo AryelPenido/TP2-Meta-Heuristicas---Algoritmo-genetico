@@ -16,7 +16,7 @@ problema.limitSup = [100,100]
 
 #parametros
 params = structure()
-params.maxIt = 100
+params.maxIt = 10
 params.npop = 1000 #aumentar depois
 params.sigma = 0.1
 
@@ -110,7 +110,7 @@ def proporcional(p):
 
 
 #main
-def init(melhorSolucao):
+def init(melhorSolucao,pop,f1,f2):
     print(melhorSolucao)
     melhorSolucao = gerarpop(melhorSolucao)
     beta = 1
@@ -122,9 +122,9 @@ def init(melhorSolucao):
             sols = sols/avg_sol
         probs = np.exp(-beta*sols)
         #selecionar os pais para o cruzamento só para teste
-        print("##########################################################")
-        print("geração: ", i)
-        print("melhor solucao intermediaria: ", melhorSolucao)
+        #print("##########################################################")
+        #print("geração: ", i)
+        #print("melhor solucao intermediaria: ", melhorSolucao)
 
         # Perform Roulette Wheel Selection
         p1 = pop[proporcional(probs)]
@@ -169,4 +169,5 @@ def init(melhorSolucao):
 
 listB = []
 for i in range(30):
-    listB.append(init(melhorSolucao.sol))
+    listB.append(init(melhorSolucao,pop,f1,f2))
+    #print(listB[i])
