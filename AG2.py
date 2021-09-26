@@ -18,7 +18,7 @@ problema.limitSup = [100,100]
 
 #parametros
 params = structure()
-params.maxIt = 10
+params.maxIt = 100
 params.npop = 1000 #aumentar depois
 params.sigma = 0.1
 
@@ -113,7 +113,7 @@ def proporcional(p):
 
 #main
 def init(melhorSolucao,pop,f1,f2):
-    print(melhorSolucao)
+    #print(melhorSolucao)
     melhorSolucao = gerarpop(melhorSolucao)
     beta = 1
     for i in range(params.maxIt):
@@ -123,12 +123,11 @@ def init(melhorSolucao,pop,f1,f2):
         if avg_sol != 0:
             sols = sols/avg_sol
         probs = np.exp(-beta*sols)
-        #selecionar os pais para o cruzamento só para teste
         #print("##########################################################")
         #print("geração: ", i)
         #print("melhor solucao intermediaria: ", melhorSolucao)
 
-        # Perform Roulette Wheel Selection
+        # seleção proporcional
         p1 = pop[proporcional(probs)]
         p2 = pop[proporcional(probs)]
 
@@ -151,53 +150,45 @@ def init(melhorSolucao,pop,f1,f2):
                 if(restricaoG1(f1.x1,f1.x2) and restricaoG2(f1.x1,f1.x2)):
                     f1.sol = G6(f1.x1,f1.x2)
                     if f1.sol < melhorSolucao.sol:
-                        melhorSolucao = f1.deepcopy()
+                        melhorSolucao = f1
                     popf.append(f1)
             if(validaLimites(f2)):
                 if(restricaoG1(f2.x1,f2.x2) and restricaoG2(f2.x1,f2.x2)):
                     f2.sol = G6(f2.x1,f2.x2)
                     if f2.sol < melhorSolucao.sol:
-                        melhorSolucao = f2.deepcopy()
+                        melhorSolucao = f2
                     popf.append(f2)
         
         pop += popf
-        #print("pop antes: ", pop)
         pop = sorted(pop, key=lambda x: x.sol)
-        #print("depois sorted")
         pop = pop[0:params.npop]
-        #print("pop depois: ", pop)
-    print("melhor solução: ", melhorSolucao)
-    return melhorSolucao
+    print("melhor solução execução intermediaria: ", melhorSolucao)
+    return melhorSolucao.sol,melhorSolucao.x1,melhorSolucao.x2
 
-listB = []
-'''
-listB.append(init(melhorSolucao,pop,f1,f2))
-print("lista b", listB)
-print("lista b", listB[0].sol)
-'''
-aux = melhorSolucao
-menorx1 = 0
-menorx2 = 0
-aux2 = structure
+listSols = []
+listx1 = []
+listx2 = []
+
 for i in range(30):
-    aux2 = (init(melhorSolucao,pop,f1,f2))
-    #print("aux2: ", aux2)
-    listB.append(aux2.sol)
-    if(aux2.sol < aux.sol):
-        menorx1 = aux2.x1
-        menorx2 = aux2.x2
-        aux.sol = aux2.sol
-     #   print("menor x1", menorx1)
-#print(listB)
-print("média: ",np.mean(listB))
-print("minimo: ", np.min(listB))
-print("maximo: ", np.max(listB))
-print("desvio padrão: ", np.std(listB))
-print("O menor valor encontrado foi ",aux.sol )
-print("com x1 = ",menorx1)
-print("e x2 = ", menorx2 )
-plt.clf()
-plt.boxplot(listB)
-plt.title("Gráfico da configuração B")
+    sol,x1,x2 = init(melhorSolucao,pop,f1,f2)
+    print("x1,x2,sol", x1,x2,sol)
+    listSols.append(sol)
+    listx1.append(x1)
+    listx2.append(x2)
 
-plt.savefig("Nomedo arquivo", format='png')
+    #print(listSols[i])
+indexmin = np.argmin(listSols)
+
+print("minimo: ", np.min(listSols))
+print("maximo: ", np.max(listSols))
+print("média: ",np.mean(listSols))
+print("desvio padrão: ", np.std(listSols))
+print(f'o menor valor encontrado nas 30 iterações foi {listSols[indexmin]} com x1 = {listx1[indexmin]} e x2 = {listx2[indexmin]} durante a execução {indexmin}')
+#print("x1 e x2 para melhor solução",listSols.index(np.min(listSols)))
+
+
+plt.clf()
+plt.boxplot(listSols)
+plt.title("Gráfico configuração B")
+
+plt.savefig("Gráfico B", format='png')
